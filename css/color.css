@@ -1,0 +1,124 @@
+* {
+    font-family: メイリオ;
+    color: #444;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+}
+
+.center {
+    text-align: center;
+}
+
+h1 {
+    margin: 20px auto;
+    text-align: center;
+}
+
+.footer {
+    color: #AAA;
+    font-size: 10pt;
+    background-color: rgba(0,0,0,0.8);
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+}
+
+.main {
+    width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#color-creator {
+    display: flex;
+    align-items: center;
+}
+
+#color-panel {
+    margin : 10px;
+    width: 300px;
+    height: 300px;
+    background-color: #888;
+}
+
+#color-sliders {
+    display: flex;
+    align-items: center;
+}
+
+.slidebar {
+    transform: rotate(-90deg);
+}
+
+#loading {
+    display: table;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    opacity: 0.8;
+    background: url("gif-load.gif") center center no-repeat;
+}
+
+button {
+    font-size: 12pt;
+    text-align: center;
+    font-weight: 600;
+    width: 200;
+    height: 50px;
+}
+
+#btn-query {
+    font-size: 14pt;
+    width: 400px;
+    letter-spacing: 1em;
+}
+
+#color-select {
+    margin: 20px;
+    width: 750px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#color-select button {
+    width: 100px;
+}
+
+#btn-lbl-white {
+    background-color: rgba(255,255,255,0.9);
+}
+#btn-lbl-black {
+    background-color: rgba(0,0,0,0.9);
+    color: #fff;
+}
+#btn-lbl-red {
+    background-color: rgba(255,0,0,0.9);
+    color: #fff;
+}
+#btn-lbl-yellow {
+    background-color: rgba(255,255,0,0.9);
+}
+#btn-lbl-green {
+    background-color: rgba(0,255,0,0.9);
+}
+#btn-lbl-blue {
+    background-color: rgba(0,0,255,0.9);
+    color: #fff;
+}
+#btn-lbl-purple {
+    background-color: rgba(255,0,255,0.9);
+    color: #fff;
+}
+
