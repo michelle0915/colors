@@ -6,6 +6,7 @@
 }
 
 body {
+    background: linear-gradient(-135deg, #E4A972, #9941D8)
 }
 
 .center {
@@ -31,16 +32,26 @@ h1 {
 
 .main {
     width: 800px;
+    height: calc(100vh - 50px);
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-color: #fff;
 }
 
 #color-creator {
+    margin: 20px auto;
     display: flex;
     align-items: center;
+}
+
+#color-creator .left, #color-creator .right {
+    margin: 0 10px;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
 }
 
 #color-panel {
@@ -48,15 +59,51 @@ h1 {
     width: 300px;
     height: 300px;
     background-color: #888;
+    border: 2px solid #888;
 }
 
 #color-sliders {
+    margin-top: 20px;
+    height: 250px;
     display: flex;
     align-items: center;
 }
 
-.slidebar {
+input[type=range] {
+    -webkit-appearance: none; /* WebKit */
     transform: rotate(-90deg);
+    width: 200px;
+    height: 10px;
+    background-color: #444;
+    margin: -70px;
+    border-radius: 5px;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: block;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+}
+input[type=range]:active::-webkit-slider-thumb {
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+#slider-r::-webkit-slider-thumb {
+    background-color: #f00;
+}
+#slider-g::-webkit-slider-thumb {
+    background-color: #0f0;
+}
+#slider-b::-webkit-slider-thumb {
+    background-color: #00f;
+}
+
+#rgb-values span {
+    width: 35px;
+    display: inline-block;
 }
 
 #loading {
@@ -71,22 +118,40 @@ h1 {
     background: url("gif-load.gif") center center no-repeat;
 }
 
+#query {
+    display: flex;
+    margin-bottom: 20px;
+}
+
 button {
     font-size: 12pt;
     text-align: center;
     font-weight: 600;
     width: 200;
     height: 50px;
+    cursor: pointer;
 }
 
 #btn-query {
     font-size: 14pt;
     width: 400px;
-    letter-spacing: 1em;
+    transition: color 0.2s linear;
+}
+#btn-query:hover {
+    color: #f44;
+}
+
+#result {
+    font-size: 14pt;
+    color: #fff;
+    font-weight: 600;
+    line-height: 50px;
+    width: 200px;
+    padding: 0 20px;
+    background-color: #44a;
 }
 
 #color-select {
-    margin: 20px;
     width: 750px;
     display: flex;
     justify-content: space-between;
@@ -94,6 +159,11 @@ button {
 
 #color-select button {
     width: 100px;
+    border: 2px solid #888;
+    border-radius: 8px;
+}
+#color-select button:hover {
+    transform: scale(1.1);
 }
 
 #btn-lbl-white {

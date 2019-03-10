@@ -1,48 +1,66 @@
 $(function() {
 
-    // クエリ実行ボタン
-    $("#btn-query").on('click', function() {
-
+    // カラー表示初期化
+    (function() {
         var r = $("#slider-r").val();
         var g = $("#slider-g").val();
         var b = $("#slider-b").val();
+        $("#r").text(r);
+        $("#g").text(g);
+        $("#b").text(b);
+    })();
+
+    $("#color-panel").css("background-color", "rgb("+r+","+g+","+b+")");
+
+    // クエリ実行ボタン
+    $("#btn-query").on('click', function() {
+
+        var r = parseInt($("#slider-r").val());
+        var g = parseInt($("#slider-g").val());
+        var b = parseInt($("#slider-b").val());
+        var postdata = {
+            rgb: [ r, g, b ]
+        };
+
+        $("button").prop("disabled", true);
 
         $.ajax({
             url: 'http://localhost:80/query',
             type: 'POST',
-            dataType: 'json',
-            data: {
-                rgb: [ r, g, b ]
-            }
+            contentType: 'application/json',
+            data: JSON.stringify(postdata)
         })
         .done(function(data) {
             var result = data.result;
             console.log(result);
-            $("#result").text(result);
+            $("#result").text("AI: 「 " + result + " 」");
         })
         .fail(function(data) {
             console.log(data);
             console.log("failed to get data...");
         })
-        .always(function(data) {});
+        .always(function(data) {
+            $("button").prop("disabled", false);
+        });
     });
 
     // ラベル送信・学習ボタン
     $("#color-select button").on('click', function() {
 
-        var r = $("#slider-r").val();
-        var g = $("#slider-g").val();
-        var b = $("#slider-b").val();
-        var label = $(this).val();
+        var r = parseInt($("#slider-r").val());
+        var g = parseInt($("#slider-g").val());
+        var b = parseInt($("#slider-b").val());
+        var label = parseInt($(this).val());
+        var postdata = {
+            rgb: [ r, g, b ],
+            label: label
+        };
 
         $.ajax({
             url: 'http://localhost:80/train',
             type: 'POST',
-            dataType: 'json',
-            data: {
-                rgb: [ r, g, b ],
-                label: label
-            }
+            contentType: 'application/json',
+            data: JSON.stringify(postdata)
         })
         .done(function(data) {
             console.log("send traindata.");
@@ -54,7 +72,7 @@ $(function() {
         .always(function(data) {});
     });
 
-    $(".slidebar").on('input', function() {
+    $("input[type='range']").on('input', function() {
         var r = $("#slider-r").val();
         var g = $("#slider-g").val();
         var b = $("#slider-b").val();

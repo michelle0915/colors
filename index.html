@@ -2,25 +2,36 @@
 <html lang="ja">
     <head>
         <meta charset="utf-8">
-        <title>Colors</title>
-        <link rel="stylesheet" href="css/color.css">
+        <title>ColorAI</title>
+        <link rel="stylesheet" href="css/colorai_client.css">
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-        <script src="js/color.js"></script>
+        <script src="js/colorai_client.js"></script>
+        <script src="colorai_dl.js"></script>
     </head>
     <body>
         <div class="main">
+            <h1>ColorAI</h1>
+            <p>AIに色を学習させましょう</p>
 
             <div id="color-creator">
-                <div id="color-panel"></div>
-                <div id="color-sliders">
-                    <input id="slider-r" class="slidebar" type="range" min="0" max="255" value="125" />
-                    <input id="slider-g" class="slidebar" type="range" min="0" max="255" value="125" />
-                    <input id="slider-b" class="slidebar" type="range" min="0" max="255" value="125" />
+                <div class="left">
+                    <div id="color-panel"></div>
+                </div>
+                <div class="right">
+                    <div id="color-sliders">
+                        <input id="slider-r" type="range" orient="vertical" min="0" max="255" value="125" />
+                        <input id="slider-g" type="range" orient="vertical" min="0" max="255" value="125" />
+                        <input id="slider-b" type="range" orient="vertical" min="0" max="255" value="125" />
+                    </div>
+                    <p id="rgb-values">R: <span id="r"></span> G: <span id="g"></span> B: <span id="b"></span></p>
                 </div>
             </div>
-            <p id="rgb-values">R: <span id="r"></span> G: <span id="g"></span> B: <span id="b"></span></p>
-            <div class="center"><button id="btn-query">クエリ実行</button></div>
-            <p id="result"></p>
+            <div id="query">
+                <button id="btn-query">AIに聞いてみる「何色？」</button>
+                <p id="result"></p>
+            </div>
+            
+            <p>正解をAIに教えてあげてください</p>
             <div id="color-select">
                 <button id="btn-lbl-white" type="button" value="0">WHITE</button>
                 <button id="btn-lbl-black" type="button" value="1">BLACK</button>

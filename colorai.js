@@ -13,29 +13,30 @@ app.listen(80);
 console.log("server runnnig");
 
 // Page Request
-app.get('/', function(req, res) {
-    fs.readFile('./index.html', 'utf-8', function(err, data) {
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.write(data);
-        res.end();
-    });
-});
+function requestPage(app, urlpath, filepath) {
+    var contentTypeMap = {
+        html: 'text/html',
+        css: 'text/css',
+        js: 'text/javascript',
+    }
 
-app.get('/css/color.css', function(req, res) {
-    fs.readFile('./css/color.css', 'utf-8', function(err, data) {
-        res.writeHead(200, {'Content-Type': 'text/css'});
-        res.write(data);
-        res.end();
-    });
-});
+    // ファイルの拡張子
+    var ext = filepath.match(/\.[^.]+$/)[0].slice(1);
+    var contentType = contentTypeMap[ext] || 'text/plain';
 
-app.get('/js/color.js', function(req, res) {
-    fs.readFile('./js/color.js', 'utf-8', function(err, data) {
-        res.writeHead(200, {'Content-Type': 'text/javascript'});
-        res.write(data);
-        res.end();
+    app.get(urlpath, function(req, res) {
+        fs.readFile(filepath, 'utf-8', function(err, data) {
+            res.writeHead(200, {'Content-Type': contentType});
+            res.write(data);
+            res.end();
+        });
     });
-});
+}
+requestPage(app, '/', './index.html');
+requestPage(app, '/css/colorai_client.css', './css/colorai_client.css');
+requestPage(app, '/js/colorai_client.js', './js/colorai_client.js');
+requestPage(app, '/colorai_dl.js', './colorai_dl.js');
+
 
 var colors = {
     0: "red",
@@ -45,12 +46,11 @@ var colors = {
 
 // POST by Ajax
 app.post('/query', function(req, res) {
-    console.log(req.body.command);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json');
 
-    var rgb = req.body.rgb.map(x => parseInt(x));
-
+    console.log(req.body);
+    var rgb = req.body.rgb;
     var result = colors[maxAt(rgb)];
 
     // response
@@ -60,11 +60,11 @@ app.post('/query', function(req, res) {
 });
 
 app.post('/train', function(req, res) {
-    console.log(req.body.command);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json');
 
-    var rgb = req.body.rgb.map(x => parseInt(x));
+    console.log(req.body);
+    var rgb = req.body.rgb;
     var label = req.body.label;
 
 //    var result = colors[maxAt(rgb)];
@@ -80,16 +80,7 @@ app.post('/train', function(req, res) {
 
 // 配列の中から最大値を持つ要素のインデックスを返す
 function maxAt(arr) {
-    if (arr === undefined || arr.length === 0) return; 
-
-    var maxidx = 0;
-    var maxvalue = arr[0];
-    for (var i = 1; i < arr.length; i++) {
-        if (arr[i] > maxvalue) {
-            maxidx = i;
-            maxvalue = arr[i];
-        }
-    }
-    
-    return maxidx;
+    return arr.reduce(function(maxidx, val, index, arr) {
+        return (arr[maxidx] < val) ? index : maxidx;
+    }, 0);
 }
