@@ -1,8 +1,10 @@
+// ベクトル演算用マップ関数
 function maparrays(fn, arr1, arr2) {
     var result = [];
     
     for (var i = 0; i < arr1.length && i < arr2.length; i++) {
         result.push(fn(arr1[i], arr2[i]));
+        // 注：arr1[i]が参照型の場合、破壊的になる可能性あり
     }
     return result;
 }
@@ -22,6 +24,31 @@ function vmulti(arr1, arr2) {
     return maparrays(function(x, y) { return x * y; }, arr1, arr2);
 }
 
+// 行列演算用マップ関数
+function mapmatrix(fn, mat1, mat2) {
+    var result = [];
+    
+    for (var i = 0; i < mat1.length && i < mat2.length; i++) {
+        var row = []
+        for (var j = 0; j < mat1[0].length && j < mat2[0].length; j++) {
+            row.push(fn(mat1[i][j], mat2[i][j]));
+        }
+        result.push(row);
+    }
+    return result;
+}
+
+// 行列加算
+function mplus(mat1, mat2) {
+    return mapmatrix(function(x, y) { return x + y}, mat1, mat2);
+}
+
+// 行列の各要素ごとに処理をする関数
+function matEach(fn, mat) {
+    return mat.map(row => row.map(x => fn(x)));
+}
+
+// 合計
 function sum(arr) {
     return arr.reduce(function (sum, val, index, arr) {
         return sum + val;
@@ -34,14 +61,41 @@ function innerProduct(arr1, arr2) {
     return sum(vmulti(arr1, arr2));
 }
 
-// 線形結合
-function dot(mat, vect) {
+// 転置行列
+function tr(mat) {
     var result = [];
 
-    mat.forEach(function(row) {
-        result.push(innerProduct(row, vect));
-    })
-    return result;
+    // ベクトルの場合、2重配列に変換
+    if (typeof mat[0] === 'number') { mat = [mat]; }
+    for (var n = 0; n < mat[0].length; n++) {
+        var row = [];
+        for (var m = 0; m < mat.length; m++) {
+            row.push(mat[m][n]);
+        }
+        result.push(row);
+    }
+    return (result.length === 1) ? result[0] : result;
+}
+
+// 行列の積
+function dot(mat1, mat2) {
+    var result = [];
+
+    // ベクトルの場合、2重配列に変換
+    if (typeof mat1[0] === 'number') { mat1 = [mat1]; }
+    if (typeof mat2[0] === 'number') { mat2 = [mat2]; }
+
+    // mat2は計算しやすいように転置
+    mat2 = tr(mat2);
+
+    mat1.forEach(function(row) {
+        var outrow = [];
+        mat2.forEach(function(col) {
+            outrow.push(innerProduct(row, col));
+        });
+        result.push(outrow);
+    });
+    return (result.length === 1) ? result[0] : result;
 }
 
 // ソフトマックス関数（出力値の正規化）
@@ -60,3 +114,134 @@ function crossEntropyError(y, t) {
     var delta = 1e-7;
     return -sum(vmulti(t, y.map(x => Math.log(x + delta))));
 }
+
+// Affine Layer
+// 重み係数とバイアスにより出力
+// 学習により更新
+function Affine(name) {
+    var _w, _b, _x, _dw, _db;
+
+    return {
+        name: name,
+        set: function(input) {
+            _w = input.w;
+            _b = input.b;
+        },
+        forward: function(x) {
+            _x = x;
+            return vplus(dot(_x, _w), _b);
+        },
+        backward: function(dout) {
+            _dw = dot(tr(_x), dout);
+            _db = dout;
+            return dot(dout, tr(_w));
+        },
+        update: function(rate) {
+            _w = mplus(_w, matEach(function(x) { return -1 * rate * x; }, _dw));
+            _b = vplus(_b, _db.map(x => -1 * rate * x));
+        },
+        export: function() {
+            return {
+                w: _w,
+                b: _b,
+            }
+        }
+    }
+}
+
+// ReLU Layer
+// 0以下の出力を0に切り替える
+function Relu() {
+    var _mask;
+
+    return {
+        forward: function(x) {
+            _mask = x.map(v => (v > 0));
+            return vmulti(x, _mask);
+        },
+        backward: function(dout) {
+            return vmulti(dout, _mask);
+        },
+        update: function() {},
+        export: function() {}
+    }
+}
+
+// Softmax + CrossEntropyError Layer
+function SoftmaxWithLoss() {
+    var _y, _t, _loss;
+
+    return {
+        forward: function(x, t) {
+            _t = t;
+            _y = softmax(x);
+            _loss = crossEntropyError(_y, _t);
+            return _loss;
+        },
+        backward: function() {
+            return vminus(_y, _t);
+        }
+    }
+
+}
+
+// ニューラルネット全体
+function NeuralNet() {
+    var layers = [];
+    var lastLayer;
+    var learningRate = 0.1; // 学習係数（1回の学習がどれほど影響するか）
+
+    return {
+        init: function(input) {
+            layers.push(Affine('Affine1'));
+            layers.push(Relu());
+            lastLayer = SoftmaxWithLoss();
+
+            // 各層の初期値設定
+            var layerSettings = {
+                Affine1: {
+                    w: [
+                        [1.0, 0.2, 0.1],
+                        [0.3, 0.9, 0.1],
+                        [0.1, 0.3, 1.2]
+                    ],
+                    b: [0.1, 0.2, 0.3]
+                }
+            };
+            layers.forEach(function(layer) {
+                var input = layerSettings[layer.name];
+                input && layer.set(input);
+            });
+        },
+        predict: function(x) {
+            layers.forEach(function(layer) {
+                x = layer.forward(x);
+            });
+            return x;
+        },
+        train: function(x, t) {
+            // forward
+            lastLayer.forward(this.predict(x), t);
+
+            // backward（勾配計算）
+            var dout = lastLayer.backward();
+            for (var i = layers.length - 1; i >= 0; i--) {
+                dout = layers[i].backward(dout);
+            }
+
+            layers.forEach(function(layer) {
+                layer.update(learningRate);
+            });
+        },
+        export: function() {
+            layers.forEach(function(layer) {
+                console.log(layer.export());
+            });
+        }
+    }
+}
+
+module.exports = {
+    NeuralNet: NeuralNet,
+    softmax: softmax
+};

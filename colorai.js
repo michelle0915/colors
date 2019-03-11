@@ -1,6 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const colorai_dl = require('./colorai_dl.js');
+require('date-utils');
+
+// ニューラルネットの作成・ロード
+var network = colorai_dl.NeuralNet();
+network.init(JSON.parse(fs.readFileSync('./save.json', 'utf-8')));
 
 //server setting and run
 const app = express();
@@ -46,32 +52,58 @@ var colors = {
 
 // POST by Ajax
 app.post('/query', function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Type', 'application/json');
 
-    console.log(req.body);
+//    console.log(req.body);
     var rgb = req.body.rgb;
-    var result = colors[maxAt(rgb)];
+
+    // RGB値をそれぞれ0~1の値に正規化
+    var x = rgb.map(x => x / 255);
+    var y = network.predict(x);
+//    console.log(y);
+    var result = colors[maxAt(y)];
 
     // response
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({
         result: result
     }));
 });
 
 app.post('/train', function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Type', 'application/json');
 
-    console.log(req.body);
+//    console.log(req.body);
     var rgb = req.body.rgb;
     var label = req.body.label;
 
-//    var result = colors[maxAt(rgb)];
+    // rgbをそれぞれ0~1の値に正規化
+    var x = rgb.map(x => x / 255);
+    var t = [];
+    // labelをone-hot表現に変換
+    for (var i = 0; i < Object.keys(colors).length; i++) {
+        t[i] = (i === label) ? 1 : 0;
+    }
+    // 学習
+    network.train(x, t);
+    network.export();
 
-    console.log("=======train=======");
-    console.log(rgb);
-    console.log(label);
+    // response
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({
+        success: true
+    }));
+});
+
+app.post('/save', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
+
+    var timestamp = new Date().toFormat('YYYYMMDDHH24MISS');
+    fs.renameSync('./save.json', './save_' + timestamp + '.json');
+    network.export();
+//    fs.writeFileSync('./save.json', JSON.stringify());
+
     // response
     res.send(JSON.stringify({
         success: true
@@ -84,3 +116,4 @@ function maxAt(arr) {
         return (arr[maxidx] < val) ? index : maxidx;
     }, 0);
 }
+
