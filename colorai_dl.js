@@ -150,7 +150,8 @@ function Affine(name) {
 }
 
 // ReLU Layer
-// 0以下の出力を0に切り替える
+// 活性化関数：0以下の出力を0に切り替える
+// 複雑な深層学習で有効、今回は使わない
 function Relu() {
     var _mask;
 
@@ -161,6 +162,24 @@ function Relu() {
         },
         backward: function(dout) {
             return vmulti(dout, _mask);
+        },
+        update: function() {},
+        export: function() {}
+    }
+}
+
+// Sigmoid Layer
+// 活性化関数：出力を0~1にする
+function Sigmoid() {
+    var _out;
+
+    return {
+        forward: function(x) {
+            _out = x.map(v => 1 / (1 + Math.exp(-v)));
+            return _out;
+        },
+        backward: function(dout) {
+            return vmulti(dout, _out.map(x => (1 - x) * x));
         },
         update: function() {},
         export: function() {}
@@ -192,13 +211,14 @@ function NeuralNet() {
     var learningRate = 0.1; // 学習係数（1回の学習がどれほど影響するか）
 
     return {
-        init: function(input) {
+        init: function(settings) {
             layers.push(Affine('Affine1'));
-            layers.push(Relu());
+            // layers.push(Relu());
+            layers.push(Sigmoid());
             lastLayer = SoftmaxWithLoss();
 
             // 各層の初期値設定
-            var layerSettings = {
+            var layerSettings = settings || {
                 Affine1: {
                     w: [
                         [1.0, 0.2, 0.1],
@@ -234,9 +254,13 @@ function NeuralNet() {
             });
         },
         export: function() {
+            var expObj = {};
             layers.forEach(function(layer) {
-                console.log(layer.export());
+                if (layer.name) {
+                    expObj[layer.name] = layer.export();
+                }
             });
+            return expObj;
         }
     }
 }

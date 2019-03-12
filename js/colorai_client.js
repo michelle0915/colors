@@ -72,6 +72,21 @@ $(function() {
         .always(function(data) {});
     });
 
+    $("h1").on('click', function() {
+
+        $.ajax({
+            url: 'http://localhost:80/save',
+            type: 'POST',
+            contentType: 'application/json',
+            data: ''
+        })
+        .done(function(data) {
+        })
+        .fail(function(data) {
+        })
+        .always(function(data) {});
+    });
+
     $("input[type='range']").on('input', function() {
         var r = $("#slider-r").val();
         var g = $("#slider-g").val();

@@ -6,7 +6,8 @@ require('date-utils');
 
 // ニューラルネットの作成・ロード
 var network = colorai_dl.NeuralNet();
-network.init(JSON.parse(fs.readFileSync('./save.json', 'utf-8')));
+loadSetting(network);
+var begintimestamp = new Date().toFormat('YYYYMMDDHH24MISS'); // ファイル名変更に使用
 
 //server setting and run
 const app = express();
@@ -41,13 +42,16 @@ function requestPage(app, urlpath, filepath) {
 requestPage(app, '/', './index.html');
 requestPage(app, '/css/colorai_client.css', './css/colorai_client.css');
 requestPage(app, '/js/colorai_client.js', './js/colorai_client.js');
-requestPage(app, '/colorai_dl.js', './colorai_dl.js');
 
 
 var colors = {
-    0: "red",
-    1: "green",
-    2: "blue",
+    0: "black",
+    1: "white",
+    2: "red",
+    3: "yellow",
+    4: "green",
+    5: "blue",
+    6: "purple",
 };
 
 // POST by Ajax
@@ -99,10 +103,8 @@ app.post('/save', function(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json');
 
-    var timestamp = new Date().toFormat('YYYYMMDDHH24MISS');
-    fs.renameSync('./save.json', './save_' + timestamp + '.json');
-    network.export();
-//    fs.writeFileSync('./save.json', JSON.stringify());
+    backupSetting(begintimestamp);
+    fs.writeFileSync('./save.json', JSON.stringify(network.export()));
 
     // response
     res.send(JSON.stringify({
@@ -117,3 +119,22 @@ function maxAt(arr) {
     }, 0);
 }
 
+// ニューラルネットワークの初期設定値の読み込み
+function loadSetting(network) {
+    var settings;
+    try {
+        settings = JSON.parse(fs.readFileSync('./save.json', 'utf-8'));
+    } catch (err) {
+        console.log("Setting file not found.");
+    }
+    network.init(settings);
+}
+
+// 設定ファイルバックアップ
+function backupSetting(timestamp) {
+    try {
+        fs.renameSync('./save.json', './save_' + timestamp + '.json');
+    } catch (err) {
+        console.log("Setting file not found.");
+    }
+}
