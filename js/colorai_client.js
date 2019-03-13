@@ -72,6 +72,7 @@ $(function() {
         .always(function(data) {});
     });
 
+    // TODO saveボタン配置
     $("h1").on('click', function() {
 
         $.ajax({
@@ -87,6 +88,7 @@ $(function() {
         .always(function(data) {});
     });
 
+    // カラースライドバーによる背景色表示変更
     $("input[type='range']").on('input', function() {
         var r = $("#slider-r").val();
         var g = $("#slider-g").val();

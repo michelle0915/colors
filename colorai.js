@@ -7,19 +7,18 @@ require('date-utils');
 // ニューラルネットの作成・ロード
 var network = colorai_dl.NeuralNet();
 loadSetting(network);
-var begintimestamp = new Date().toFormat('YYYYMMDDHH24MISS'); // ファイル名変更に使用
+var timestamp = new Date().toFormat('YYYYMMDDHH24MISS'); // 設定ファイルバックアップ作成に使用
 
-//server setting and run
+// server setting and run
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
- 
 app.listen(80);
 console.log("server runnnig");
 
-// Page Request
+// リクエストを受け付けるページの登録
 function requestPage(app, urlpath, filepath) {
     var contentTypeMap = {
         html: 'text/html',
@@ -27,7 +26,7 @@ function requestPage(app, urlpath, filepath) {
         js: 'text/javascript',
     }
 
-    // ファイルの拡張子
+    // ファイルの拡張子からContent-Typeを指定
     var ext = filepath.match(/\.[^.]+$/)[0].slice(1);
     var contentType = contentTypeMap[ext] || 'text/plain';
 
@@ -44,9 +43,10 @@ requestPage(app, '/css/colorai_client.css', './css/colorai_client.css');
 requestPage(app, '/js/colorai_client.js', './js/colorai_client.js');
 
 
+// インデックスと色の対応
 var colors = {
-    0: "black",
-    1: "white",
+    0: "white",
+    1: "black",
     2: "red",
     3: "yellow",
     4: "green",
@@ -55,6 +55,7 @@ var colors = {
 };
 
 // POST by Ajax
+// 推論
 app.post('/query', function(req, res) {
 
 //    console.log(req.body);
@@ -74,6 +75,7 @@ app.post('/query', function(req, res) {
     }));
 });
 
+// 学習
 app.post('/train', function(req, res) {
 
 //    console.log(req.body);
@@ -87,9 +89,7 @@ app.post('/train', function(req, res) {
     for (var i = 0; i < Object.keys(colors).length; i++) {
         t[i] = (i === label) ? 1 : 0;
     }
-    // 学習
     network.train(x, t);
-    network.export();
 
     // response
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -99,12 +99,14 @@ app.post('/train', function(req, res) {
     }));
 });
 
+// 保存
 app.post('/save', function(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json');
 
-    backupSetting(begintimestamp);
-    fs.writeFileSync('./save.json', JSON.stringify(network.export()));
+    backupSetting(timestamp);
+    timestamp = new Date().toFormat('YYYYMMDDHH24MISS');
+    fs.writeFileSync('./save.json', JSON.stringify(network.export(), null, '    '));
 
     // response
     res.send(JSON.stringify({

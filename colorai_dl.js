@@ -221,11 +221,11 @@ function NeuralNet() {
             var layerSettings = settings || {
                 Affine1: {
                     w: [
-                        [1.0, 0.2, 0.1],
-                        [0.3, 0.9, 0.1],
-                        [0.1, 0.3, 1.2]
+                        [ r(), r(), r(), r(), r(), r(), r() ], 
+                        [ r(), r(), r(), r(), r(), r(), r() ], 
+                        [ r(), r(), r(), r(), r(), r(), r() ], 
                     ],
-                    b: [0.1, 0.2, 0.3]
+                    b:  [ r(), r(), r(), r(), r(), r(), r() ]
                 }
             };
             layers.forEach(function(layer) {
@@ -255,6 +255,7 @@ function NeuralNet() {
         },
         export: function() {
             var expObj = {};
+            // 各層ごとに設定値をオブジェクトにして出力
             layers.forEach(function(layer) {
                 if (layer.name) {
                     expObj[layer.name] = layer.export();
@@ -265,7 +266,13 @@ function NeuralNet() {
     }
 }
 
+// 0~1のランダム値
+function r() {
+    return Math.random();
+}
+
 module.exports = {
     NeuralNet: NeuralNet,
-    softmax: softmax
+    softmax: softmax,
+    tr: tr
 };
