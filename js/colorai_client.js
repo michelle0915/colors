@@ -47,6 +47,8 @@ $(function() {
     // ラベル送信・学習ボタン
     $("#color-select button").on('click', function() {
 
+        dispBlind();
+
         var r = parseInt($("#slider-r").val());
         var g = parseInt($("#slider-g").val());
         var b = parseInt($("#slider-b").val());
@@ -64,12 +66,15 @@ $(function() {
         })
         .done(function(data) {
             console.log("send traindata.");
+            removeBlind("学習が完了しました。");
         })
         .fail(function(data) {
             console.log(data);
             console.log("failed to get data...");
+            removeBlind("学習に失敗しました。");
         })
-        .always(function(data) {});
+        .always(function(data) {
+        });
     });
 
     // TODO saveボタン配置
@@ -100,13 +105,22 @@ $(function() {
         $("#color-panel").css("background-color", "rgb("+r+","+g+","+b+")");
     })
 
-    function dispLoading(){
-        if($("#loading").length == 0){
-            $("body").append("<div id='loading'></div>");
-        }
+    function dispBlind(){
+        $("#blind").show();
+        $("#img-waiting").show();
     }
 
-    function removeLoading(){
-        $("#loading").remove();
+    function removeBlind(message){
+        $("#img-waiting").hide();
+        $("#message").show().text(message);
+        setTimeout(function() {
+            $("#blind").fadeOut('normal', function() {
+                $("#message").hide().text("");
+            });
+        }, 1000);
     }
+
+    $("#blind").hide();
+    $("#img-waiting").hide();
+    $("#message").hide();
 });

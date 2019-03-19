@@ -24,6 +24,7 @@ function requestPage(app, urlpath, filepath) {
         html: 'text/html',
         css: 'text/css',
         js: 'text/javascript',
+        gif: 'image/gif',
     }
 
     // ファイルの拡張子からContent-Typeを指定
@@ -31,16 +32,23 @@ function requestPage(app, urlpath, filepath) {
     var contentType = contentTypeMap[ext] || 'text/plain';
 
     app.get(urlpath, function(req, res) {
-        fs.readFile(filepath, 'utf-8', function(err, data) {
+
+        var handler = function(err, data) {
             res.writeHead(200, {'Content-Type': contentType});
             res.write(data);
             res.end();
-        });
+        };
+        if (contentType === 'image/gif') {
+            fs.readFile(filepath, handler);
+        } else {
+            fs.readFile(filepath, 'utf-8', handler);
+        }
     });
 }
 requestPage(app, '/', './index.html');
 requestPage(app, '/css/colorai_client.css', './css/colorai_client.css');
 requestPage(app, '/js/colorai_client.js', './js/colorai_client.js');
+requestPage(app, '/waiting.gif', './waiting.gif');
 
 
 // インデックスと色の対応
@@ -89,7 +97,10 @@ app.post('/train', function(req, res) {
     for (var i = 0; i < Object.keys(colors).length; i++) {
         t[i] = (i === label) ? 1 : 0;
     }
+    console.log('========train start========');
     network.train(x, t);
+//    heavy();
+    console.log('========train finish========');
 
     // response
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -139,4 +150,8 @@ function backupSetting(timestamp) {
     } catch (err) {
         console.log("Setting file not found.");
     }
+}
+
+function heavy() {
+    for (var i = 0; i < 3000000000; i++) {i=i;}
 }

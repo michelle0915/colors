@@ -106,16 +106,32 @@ input[type=range]:active::-webkit-slider-thumb {
     display: inline-block;
 }
 
-#loading {
-    display: table;
+#blind {
     width: 100%;
     height: 100%;
     position: fixed;
     top: 0;
     left: 0;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#img-waiting {
+    width: 200px;
+    height: 200px;
+    padding: 20px;
     background-color: #fff;
-    opacity: 0.8;
-    background: url("gif-load.gif") center center no-repeat;
+}
+
+#message {
+    width: 500px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 10px;
 }
 
 #query {
