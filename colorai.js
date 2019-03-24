@@ -50,6 +50,9 @@ requestPage(app, '/css/colorai_client.css', './css/colorai_client.css');
 requestPage(app, '/js/colorai_client.js', './js/colorai_client.js');
 requestPage(app, '/waiting.gif', './waiting.gif');
 
+requestPage(app, '/manager', './manager.html');
+requestPage(app, '/css/colorai_manager.css', './css/colorai_manager.css');
+requestPage(app, '/js/colorai_manager.js', './js/colorai_manager.js');
 
 // インデックスと色の対応
 var colors = {
@@ -107,6 +110,20 @@ app.post('/train', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({
         success: true
+    }));
+});
+
+// ニューラルネットパラメータ要求
+app.post('/params', function(req, res) {
+
+    var params = network.export();
+    console.log(params);
+
+    // response
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({
+        params: params
     }));
 });
 
